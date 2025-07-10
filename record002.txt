@@ -1,0 +1,8 @@
+🖼️ 圖片處理（下一步）
+你提到「商城可能要放圖片」——這是對的，我們可以幫 Product 加上圖片欄位：
+
+python
+複製
+編輯
+image = models.ImageField(upload_to='product_images/', blank=True, null=True)
+這需要一點靜態檔設定（media root），我下個步驟幫你補上。
