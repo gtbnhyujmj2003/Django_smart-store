@@ -1,0 +1,67 @@
+✅ 現在來幫你補上：
+views.py + urls.py + 首頁 product_list.html
+🔧 store/views.py
+python
+複製
+編輯
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Product, Profile, Purchase
+from django.contrib import messages
+
+# 首頁：顯示所有商品
+def product_list(request):
+    products = Product.objects.all()
+    return render(request, 'store/product_list.html', {'products': products})
+
+# 購買商品（需登入）
+@login_required
+def buy_product(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    profile = Profile.objects.get(user=request.user)
+
+    if profile.points >= product.price:
+        # 扣點
+        profile.points -= product.price
+        profile.save()
+        # 建立購買紀錄
+        Purchase.objects.create(user=request.user, product=product)
+        messages.success(request, f"成功購買：{product.name}")
+    else:
+        messages.error(request, "點數不足，請儲值")
+
+    return redirect('product_list')
+
+# 使用者個人頁面：顯示點數與購買紀錄
+@login_required
+def profile_view(request):
+    profile = Profile.objects.get(user=request.user)
+    purchases = Purchase.objects.filter(user=request.user).order_by('-time')
+    return render(request, 'store/profile.html', {
+        'profile': profile,
+        'purchases': purchases
+    })
+🔧 store/urls.py
+python
+複製
+編輯
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.product_list, name='product_list'),  # 首頁
+    path('buy/<int:product_id>/', views.buy_product, name='buy_product'),  # 購買
+    path('profile/', views.profile_view, name='profile_view'),  # 個人頁
+]
+接著你要在 myshop/urls.py 裡掛進來：
+
+python
+複製
+編輯
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('store.urls')),  # 預設首頁
+]
