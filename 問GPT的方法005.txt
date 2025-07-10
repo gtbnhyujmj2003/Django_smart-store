@@ -1,0 +1,20 @@
+🗂️ 專案架構圖
+pgsql
+複製
+編輯
+myshop/
+├── manage.py
+├── myshop/
+│   ├── settings.py
+│   └── urls.py
+├── store/       ← 商城 app
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── templates/store/
+│   │   ├── index.html
+│   │   ├── product_list.html
+│   │   └── profile.html
+│   ├── admin.py
+│   ├── forms.py
+│   └── migrations/
