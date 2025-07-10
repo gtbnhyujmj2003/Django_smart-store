@@ -1,0 +1,103 @@
+🧪 接下來步驟
+我會一步步教你，不會跳來跳去：
+
+🔧 步驟 1：建立專案與 App
+打開你的終端機（或 Colab Terminal / Replit）：
+
+bash
+複製
+編輯
+django-admin startproject myshop
+cd myshop
+python manage.py startapp store
+然後在 settings.py 裡加入：
+
+python
+複製
+編輯
+INSTALLED_APPS = [
+    ...
+    'store',
+]
+🔧 步驟 2：建立 Models（資料模型）
+在 store/models.py 裡加：
+
+python
+複製
+編輯
+from django.db import models
+from django.contrib.auth.models import User
+
+# 使用者擴充：點數錢包
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    points = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.points} points"
+
+# 商品
+class Product(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    price = models.IntegerField()  # 點數價格
+
+    def __str__(self):
+        return f"{self.name} ({self.price} pts)"
+
+# 購買紀錄
+class Purchase(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} bought {self.product.name}"
+🔧 步驟 3：建立資料庫
+bash
+複製
+編輯
+python manage.py makemigrations
+python manage.py migrate
+然後建立超級使用者（管理後台）：
+
+bash
+複製
+編輯
+python manage.py createsuperuser
+🔧 步驟 4：自動建立 Profile（點數）
+在 store/signals.py 加入：
+
+python
+複製
+編輯
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
+from .models import Profile
+
+@receiver(post_save, sender=User)
+def create_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+再在 store/apps.py 裡：
+
+python
+複製
+編輯
+def ready(self):
+    import store.signals
+🔧 步驟 5：註冊 admin 後台
+在 store/admin.py 加入：
+
+python
+複製
+編輯
+from django.contrib import admin
+from .models import Product, Purchase, Profile
+
+admin.site.register(Product)
+admin.site.register(Purchase)
+admin.site.register(Profile)
+🔧 步驟 6：建立 Views 與 Templates（畫面）
+這邊我下個階段幫你寫 views.py 和簡單的 templates/ 畫面流程。
